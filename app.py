@@ -10,7 +10,7 @@ import requests
 # -------------------------
 # Download model if missing
 # -------------------------
-MODEL_URL = "https://drive.google.com/file/d/1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME/view?usp=drive_link"  # 🔁 Replace with actual direct URL
+MODEL_URL = MODEL_URL = "https://drive.google.com/uc?export=download&id=1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"
 MODEL_PATH = "model/model.pkl"
 
 if not os.path.exists(MODEL_PATH):
@@ -20,7 +20,7 @@ if not os.path.exists(MODEL_PATH):
         with open(MODEL_PATH, 'wb') as f:
             f.write(r.content)
         st.success("Model downloaded successfully!")
-
+model = joblib.load(MODEL_PATH)
 # -------------------------
 # Page config
 # -------------------------
