@@ -10,7 +10,7 @@ import requests
 # -------------------------
 # Download model if missing
 # -------------------------
-MODEL_URL = MODEL_URL = "https://drive.google.com/uc?export=download&id=1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"
 MODEL_PATH = "model/model.pkl"
 
 if not os.path.exists(MODEL_PATH):
