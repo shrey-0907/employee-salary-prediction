@@ -4,8 +4,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 import tempfile
+import os
+import requests
 
+# -------------------------
+# Download model if missing
+# -------------------------
+MODEL_URL = "https://drive.google.com/file/d/1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME/view?usp=drive_link"  # 🔁 Replace with actual direct URL
+MODEL_PATH = "model/model.pkl"
+
+if not os.path.exists(MODEL_PATH):
+    with st.spinner("Downloading model file..."):
+        os.makedirs("model", exist_ok=True)
+        r = requests.get(MODEL_URL)
+        with open(MODEL_PATH, 'wb') as f:
+            f.write(r.content)
+        st.success("Model downloaded successfully!")
+
+# -------------------------
 # Page config
+# -------------------------
 st.set_page_config(
     page_title="Employee Salary Prediction",
     page_icon="💼",
@@ -13,8 +31,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# -------------------------
 # Load model
-model = joblib.load("model/model.pkl")
+# -------------------------
+model = joblib.load(MODEL_PATH)
 
 # Sidebar styling
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2920/2920277.png", width=80)
@@ -75,8 +95,7 @@ Welcome to the **Employee Salary Prediction App**.
 This tool predicts whether an employee earns **>50K or <=50K** annually based on demographic and job-related inputs.
 """)
 
-
-st.image("assets/banner.jpg", use_container_width=True)
+st.image("assets/banner.jpg")  # Make sure the banner image exists
 
 if submitted:
     with st.spinner("Analyzing data and predicting salary..."):
@@ -120,6 +139,6 @@ if submitted:
 # Footer
 st.markdown("""
 ---
-Made with ❤️ using Streamlit, Scikit-learn, and Python.
-Feel free to [connect on LinkedIn](https://www.linkedin.com) or [explore the GitHub project](https://github.com/your-username/employee-salary-prediction).
+Made with ❤️ using Streamlit, Scikit-learn, and Python.  
+Feel free to [connect on LinkedIn](https://www.linkedin.com/in/shreyash-rastogi-04794125a) or [explore the GitHub project](https://github.com/shrey-0907/employee-salary-prediction).
 """)
