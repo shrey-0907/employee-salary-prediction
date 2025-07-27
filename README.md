@@ -30,6 +30,7 @@ python model/train_model.py
 ```bash
 streamlit run app.py
 ```
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://employee-salary-prediction-upkyv9lqofvljcrgfqdqrf.streamlit.app)
 
 ## 🌐 Deploy Online
 
