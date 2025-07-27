@@ -30,11 +30,17 @@ python model/train_model.py
 ```bash
 streamlit run app.py
 ```
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://employee-salary-prediction-upkyv9lqofvljcrgfqdqrf.streamlit.app)
 
 ## 🌐 Deploy Online
 
 Push this repo to GitHub and deploy instantly via [Streamlit Cloud](https://streamlit.io/cloud).
 
 ---
+
+## 🚀 Try the App
+
+Click below to launch the web app instantly on Streamlit Cloud:
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://employee-salary-prediction-upkyv9lqofvljcrgfqdqrf.streamlit.app)
+
 Made with ❤️ by an aspiring data scientist.
