@@ -8,22 +8,47 @@ import os
 import requests
 
 # -------------------------
-# Download model if missing
+# Function to download from Google Drive
 # -------------------------
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+    response = session.get(URL, params={'id': file_id}, stream=True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = {'id': file_id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    save_response_content(response, destination)
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            return value
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)
+
+# -------------------------
+# Model download + load
+# -------------------------
+file_id = "1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"  # Replace with your actual file ID
 MODEL_PATH = "model/model.pkl"
+os.makedirs("model", exist_ok=True)
 
 if not os.path.exists(MODEL_PATH):
-    with st.spinner("Downloading model file..."):
-        os.makedirs("model", exist_ok=True)
-        r = requests.get(MODEL_URL)
-        with open(MODEL_PATH, 'wb') as f:
-            f.write(r.content)
-        st.success("Model downloaded successfully!")
+    with st.spinner("Downloading model from Google Drive..."):
+        download_file_from_google_drive(file_id, MODEL_PATH)
+        st.success("✅ Model downloaded!")
 
-# -------------------------
-# Load model using pickle
-# -------------------------
+# Load model
 with open(MODEL_PATH, 'rb') as f:
     model = pickle.load(f)
 
@@ -37,12 +62,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Sidebar styling
+# Sidebar UI
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2920/2920277.png", width=80)
 st.sidebar.title("Employee Details")
-st.sidebar.markdown("\n**🌗 Want to change theme?**\n\nGo to top-right ⋮ menu → Settings → Theme\n")
+st.sidebar.markdown("🌗 Change theme from top-right settings menu")
 
-# Input form
+# Form
 def user_input():
     with st.sidebar.form("input_form"):
         age = st.slider('Age', 17, 75, 30)
@@ -89,17 +114,17 @@ def user_input():
 
 input_df, submitted = user_input()
 
-# Main UI content
+# -------------------------
+# Main content
+# -------------------------
 st.title("💼 Employee Salary Classification")
 st.markdown("""
-Welcome to the **Employee Salary Prediction App**. 
-This tool predicts whether an employee earns **>50K or <=50K** annually based on demographic and job-related inputs.
+This app predicts whether an employee earns **>50K or <=50K** annually based on input features.
 """)
-
-st.image("assets/banner.jpg")  # Ensure this image exists
+st.image("assets/banner.jpg")  # Optional
 
 if submitted:
-    with st.spinner("Analyzing data and predicting salary..."):
+    with st.spinner("Predicting salary group..."):
         prediction = model.predict(input_df)[0]
         prob = model.predict_proba(input_df).max()
 
@@ -114,11 +139,12 @@ if submitted:
         ax.set_title("Prediction Confidence")
         st.pyplot(fig)
 
+        # Input Summary
         st.markdown("---")
         st.subheader("📊 Input Summary")
         st.dataframe(input_df.T.rename(columns={0: 'Value'}))
 
-        # Generate PDF
+        # PDF Download
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
@@ -137,9 +163,11 @@ if submitted:
                     mime="application/pdf"
                 )
 
+# -------------------------
 # Footer
+# -------------------------
 st.markdown("""
 ---
-Made with ❤️ using Streamlit, Scikit-learn, and Python.  
-Feel free to [connect on LinkedIn](https://www.linkedin.com/in/shreyash-rastogi-04794125a) or [explore the GitHub project](https://github.com/shrey-0907/employee-salary-prediction).
+Made with ❤️ using Streamlit & Scikit-learn.  
+[🔗 LinkedIn](https://www.linkedin.com/in/shreyash-rastogi-04794125a) | [📂 GitHub](https://github.com/shrey-0907/employee-salary-prediction)
 """)
