@@ -46,21 +46,22 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 # -------------------------
+
+# -------------------------
 # Model download + load
 # -------------------------
-gdrive_url = f"https://drive.google.com/file/d/1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME/view?usp=sharing"
+FILE_ID = "1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"
 MODEL_PATH = "model/model.pkl"
 os.makedirs("model", exist_ok=True)
 
 if not os.path.exists(MODEL_PATH):
     with st.spinner("Downloading model from Google Drive..."):
-        gdown.download(gdrive_url, MODEL_PATH, quiet=False)
+        gdown.download(id=FILE_ID, output=MODEL_PATH, quiet=False)
         st.success("✅ Model downloaded!")
 
 # Load model
 with open(MODEL_PATH, 'rb') as f:
     model = pickle.load(f)
-
 
 # Sidebar UI
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2920/2920277.png", width=80)
