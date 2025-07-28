@@ -1,5 +1,5 @@
 import streamlit as st
-import joblib
+import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
@@ -20,7 +20,13 @@ if not os.path.exists(MODEL_PATH):
         with open(MODEL_PATH, 'wb') as f:
             f.write(r.content)
         st.success("Model downloaded successfully!")
-model = joblib.load(MODEL_PATH)
+
+# -------------------------
+# Load model using pickle
+# -------------------------
+with open(MODEL_PATH, 'rb') as f:
+    model = pickle.load(f)
+
 # -------------------------
 # Page config
 # -------------------------
@@ -30,11 +36,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# -------------------------
-# Load model
-# -------------------------
-model = joblib.load(MODEL_PATH)
 
 # Sidebar styling
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2920/2920277.png", width=80)
@@ -95,7 +96,7 @@ Welcome to the **Employee Salary Prediction App**.
 This tool predicts whether an employee earns **>50K or <=50K** annually based on demographic and job-related inputs.
 """)
 
-st.image("assets/banner.jpg")  # Make sure the banner image exists
+st.image("assets/banner.jpg")  # Ensure this image exists
 
 if submitted:
     with st.spinner("Analyzing data and predicting salary..."):
