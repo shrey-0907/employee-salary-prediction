@@ -8,6 +8,14 @@ import os
 import requests
 import gdown
 
+# Page config
+# -------------------------
+st.set_page_config(
+    page_title="Employee Salary Prediction",
+    page_icon="💼",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 # -------------------------
 # Function to download from Google Drive
 # -------------------------
@@ -40,8 +48,7 @@ def save_response_content(response, destination):
 # -------------------------
 # Model download + load
 # -------------------------
-file_id = "1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"  # Replace with your actual file ID
-gdrive_url = f"https://drive.google.com/uc?id={file_id}"
+gdrive_url = f"https://drive.google.com/file/d/1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME/view?usp=sharing"
 MODEL_PATH = "model/model.pkl"
 os.makedirs("model", exist_ok=True)
 
@@ -54,15 +61,6 @@ if not os.path.exists(MODEL_PATH):
 with open(MODEL_PATH, 'rb') as f:
     model = pickle.load(f)
 
-# -------------------------
-# Page config
-# -------------------------
-st.set_page_config(
-    page_title="Employee Salary Prediction",
-    page_icon="💼",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Sidebar UI
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2920/2920277.png", width=80)
