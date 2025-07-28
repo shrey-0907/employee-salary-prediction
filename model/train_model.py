@@ -1,5 +1,5 @@
 import pandas as pd
-import joblib
+import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -47,6 +47,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # Train model
 clf.fit(X_train, y_train)
 
-# Save model
-joblib.dump(clf, "../model/model.pkl")
-print("Model training complete and saved as model.pkl")
+# Save model using pickle (for compatibility with gdown + Streamlit)
+with open("../model/model.pkl", "wb") as f:
+    pickle.dump(clf, f)
+
+print("✅ Model trained and saved as model.pkl using pickle")

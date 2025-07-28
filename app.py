@@ -50,7 +50,7 @@ def save_response_content(response, destination):
 # -------------------------
 # Model download + load
 # -------------------------
-FILE_ID = "1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"
+FILE_ID = "1bj2dgoOikCZYklqH2bGbLsOurT45d0IW"
 MODEL_PATH = "model/model.pkl"
 os.makedirs("model", exist_ok=True)
 
