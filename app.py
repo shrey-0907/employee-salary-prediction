@@ -6,6 +6,7 @@ from fpdf import FPDF
 import tempfile
 import os
 import requests
+import gdown
 
 # -------------------------
 # Function to download from Google Drive
@@ -40,12 +41,13 @@ def save_response_content(response, destination):
 # Model download + load
 # -------------------------
 file_id = "1Fzn6Pq6ifldqjFzxCRbGORxh40gsDaME"  # Replace with your actual file ID
+gdrive_url = f"https://drive.google.com/uc?id={file_id}"
 MODEL_PATH = "model/model.pkl"
 os.makedirs("model", exist_ok=True)
 
 if not os.path.exists(MODEL_PATH):
     with st.spinner("Downloading model from Google Drive..."):
-        download_file_from_google_drive(file_id, MODEL_PATH)
+        gdown.download(gdrive_url, MODEL_PATH, quiet=False)
         st.success("✅ Model downloaded!")
 
 # Load model
