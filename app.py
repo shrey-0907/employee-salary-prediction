@@ -1,13 +1,17 @@
 import streamlit as st
-import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 import tempfile
 import os
-import requests
-import gdown
+import cloudpickle as pickle  # safer than pickle
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 
+# -------------------------
 # Page config
 # -------------------------
 st.set_page_config(
@@ -16,57 +20,62 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# -------------------------
-# Function to download from Google Drive
-# -------------------------
-def download_file_from_google_drive(file_id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-
-    session = requests.Session()
-    response = session.get(URL, params={'id': file_id}, stream=True)
-    token = get_confirm_token(response)
-
-    if token:
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-
-    save_response_content(response, destination)
-
-def get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith("download_warning"):
-            return value
-    return None
-
-def save_response_content(response, destination):
-    CHUNK_SIZE = 32768
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:
-                f.write(chunk)
 
 # -------------------------
+# Optional: Retrain button
+# -------------------------
+def train_model():
+    df = pd.read_csv("data/adult.csv")
+    df = df.replace('?', 'Unknown')
+    df = df[df['workclass'] != 'Without-pay']
+    df = df[df['workclass'] != 'Never-worked']
+    df = df[(df['age'] >= 17) & (df['age'] <= 75)]
+    df = df[(df['educational-num'] >= 5) & (df['educational-num'] <= 16)]
+    df = df.drop(columns=['education'])
+
+    X = df.drop('income', axis=1)
+    y = df['income']
+
+    num_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    cat_cols = X.select_dtypes(include=['object']).columns.tolist()
+
+    preprocessor = ColumnTransformer([
+        ('num', StandardScaler(), num_cols),
+        ('cat', OneHotEncoder(handle_unknown='ignore'), cat_cols)
+    ])
+
+    clf = Pipeline([
+        ('preprocessor', preprocessor),
+        ('classifier', RandomForestClassifier(n_estimators=100, random_state=42))
+    ])
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    clf.fit(X_train, y_train)
+
+    os.makedirs("model", exist_ok=True)
+    with open("model/model.pkl", "wb") as f:
+        pickle.dump(clf, f)
+    return clf
 
 # -------------------------
-# Model download + load
+# Load or Train Model
 # -------------------------
-FILE_ID = "1bj2dgoOikCZYklqH2bGbLsOurT45d0IW"
 MODEL_PATH = "model/model.pkl"
-os.makedirs("model", exist_ok=True)
-
 if not os.path.exists(MODEL_PATH):
-    with st.spinner("Downloading model from Google Drive..."):
-        gdown.download(id=FILE_ID, output=MODEL_PATH, quiet=False)
-        st.success("✅ Model downloaded!")
-
-# Load model
-with open(MODEL_PATH, 'rb') as f:
-    model = pickle.load(f)
+    st.warning("Model not found. Training from scratch...")
+    model = train_model()
+else:
+    with open(MODEL_PATH, 'rb') as f:
+        model = pickle.load(f)
 
 # Sidebar UI
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2920/2920277.png", width=80)
 st.sidebar.title("Employee Details")
-st.sidebar.markdown("🌗 Change theme from top-right settings menu")
+
+# Optional retrain button
+if st.sidebar.button("🔁 Retrain Model on Server"):
+    model = train_model()
+    st.sidebar.success("✅ Model retrained and reloaded!")
 
 # Form
 def user_input():
@@ -115,14 +124,9 @@ def user_input():
 
 input_df, submitted = user_input()
 
-# -------------------------
-# Main content
-# -------------------------
+# Main UI
 st.title("💼 Employee Salary Classification")
-st.markdown("""
-This app predicts whether an employee earns **>50K or <=50K** annually based on input features.
-""")
-st.image("assets/banner.jpg")  # Optional
+st.markdown("Predicts whether an employee earns **>50K or <=50K** annually based on inputs.")
 
 if submitted:
     with st.spinner("Predicting salary group..."):
@@ -133,42 +137,27 @@ if submitted:
         st.info(f"🔍 Confidence Score: {prob * 100:.2f}%")
 
         # Confidence chart
-        st.subheader("📊 Model Confidence Chart")
+        st.subheader("📊 Confidence Chart")
         fig, ax = plt.subplots()
         ax.bar(['<=50K', '>50K'], model.predict_proba(input_df)[0], color=["skyblue", "lightgreen"])
-        ax.set_ylabel("Probability")
-        ax.set_title("Prediction Confidence")
         st.pyplot(fig)
 
-        # Input Summary
-        st.markdown("---")
-        st.subheader("📊 Input Summary")
-        st.dataframe(input_df.T.rename(columns={0: 'Value'}))
+        st.subheader("📄 Input Summary")
+        st.dataframe(input_df.T.rename(columns={0: "Value"}))
 
-        # PDF Download
+        # PDF report
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="Employee Salary Prediction Report", ln=True, align="C")
         pdf.ln(10)
-        pdf.cell(200, 10, txt=f"Predicted Salary Group: {prediction}", ln=True)
-        pdf.cell(200, 10, txt=f"Confidence Score: {prob * 100:.2f}%", ln=True)
+        pdf.cell(200, 10, txt=f"Prediction: {prediction}", ln=True)
+        pdf.cell(200, 10, txt=f"Confidence: {prob * 100:.2f}%", ln=True)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
             pdf.output(tmpfile.name)
             with open(tmpfile.name, "rb") as f:
-                st.download_button(
-                    label="📄 Download Prediction as PDF",
-                    data=f,
-                    file_name="salary_prediction_report.pdf",
-                    mime="application/pdf"
-                )
+                st.download_button("📥 Download PDF", data=f, file_name="report.pdf", mime="application/pdf")
 
-# -------------------------
 # Footer
-# -------------------------
-st.markdown("""
----
-Made with ❤️ using Streamlit & Scikit-learn.  
-[🔗 LinkedIn](https://www.linkedin.com/in/shreyash-rastogi-04794125a) | [📂 GitHub](https://github.com/shrey-0907/employee-salary-prediction)
-""")
+st.markdown("---\nBuilt with ❤️ by Shreyash Rastogi")
