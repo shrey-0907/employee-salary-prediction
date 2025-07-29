@@ -3,17 +3,25 @@
 A professional machine learning project to predict whether an employee earns more than $50K per year using demographic and employment data.
 
 ## 🔍 Features
-- Exploratory Data Analysis
-- Data Cleaning and Preprocessing
-- Model Training using Random Forest
-- Interactive Web App via Streamlit
 
-## 🚀 How to Run
+- Clean and preprocessed dataset using pipelines  
+- Model trained with Random Forest Classifier  
+- Model loaded dynamically from Google Drive  
+- Interactive UI with modern design and banner image  
+- Predict salary group (>50K or <=50K)  
+- Download prediction results as a PDF  
+- Fully deployable on Render
 
-1. Clone this repo:
+---
+
+## 🚀 How to Run Locally
+
+1. **Clone this repo:**
+
 ```bash
-git clone https://github.com/your-username/employee-salary-prediction.git
+git clone https://github.com/shrey-0907/employee-salary-prediction.git
 cd employee-salary-prediction
+
 ```
 
 2. Install dependencies:
@@ -31,16 +39,37 @@ python model/train_model.py
 streamlit run app.py
 ```
 
-## 🌐 Deploy Online
+🌐 Deploy on Render
+Push this repo to GitHub
 
-Push this repo to GitHub and deploy instantly via [Streamlit Cloud](https://streamlit.io/cloud).
+Go to https://render.com/
 
----
+Connect your GitHub repository
+
+Set your Build Command:
+```bash
+pip install -r requirements.txt
+```
+Set your Start Command:
+```bash
+streamlit run app.py
+```
+Render will auto-install packages and download the model from Google Drive on first launch.
+
+✅ Model auto-downloads to model/model.pkl using gdown.
+
 
 ## 🚀 Try the App
+👉 Launch Live App on Render
 
 Click below to launch the web app instantly on Streamlit Cloud:
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://employee-salary-prediction-upkyv9lqofvljcrgfqdqrf.streamlit.app)
+[![Open in Render](Available at your primary URL https://employee-salary-prediction-okzt.onrender.com)
 
-Made with ❤️ by an aspiring data scientist.
+👨‍💻 Author
+Made with ❤️ by Shreyash Rastogi
+GitHub: @shrey-0907
+
+---
+
+
