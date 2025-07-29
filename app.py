@@ -127,6 +127,7 @@ input_df, submitted = user_input()
 # Main UI
 st.title("💼 Employee Salary Classification")
 st.markdown("Predicts whether an employee earns **>50K or <=50K** annually based on inputs.")
+st.image("assets/banner.jpg")
 
 if submitted:
     with st.spinner("Predicting salary group..."):
